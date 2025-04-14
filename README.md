@@ -21,6 +21,7 @@ The `bootstrap/debian-ubuntu.sh` script automates the installation of common dev
 - **Postman** (via Snap)
 - **Docker**
 - **GNOME Tweaks**
+- **Grub Customizer**
 - **Discord**
 - **Spotify**
 - **Global Git configuration**
