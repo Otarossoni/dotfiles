@@ -5,6 +5,7 @@ set -euo pipefail
 #---------------------------------------------
 #   Linux Bootstrap Script
 #   Installs common developer tools
+#   Tested on Debian/Ubuntu-based systems
 #---------------------------------------------
 
 # Variables
