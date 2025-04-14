@@ -25,7 +25,8 @@ install_apt_packages() {
     gnupg \
     lsb-release \
     software-properties-common \
-    remmina
+    remmina \
+    openssh-client
 }
 
 install_nvm_and_node() {
@@ -127,12 +128,25 @@ install_spotify() {
   sudo apt install -y spotify-client
 }
 
+generate_ssh_key() {
+  log "Generating SSH key..."
+  SSH_KEY="$HOME/.ssh/id_ed25519"
+  if [ ! -f "$SSH_KEY" ]; then
+    mkdir -p "$HOME/.ssh"
+    ssh-keygen -t ed25519 -C "$USER@$(hostname)" -f "$SSH_KEY" -N ""
+    eval "$(ssh-agent -s)"
+    ssh-add "$SSH_KEY"
+  else
+    log "SSH key already exists. Skipping generation."
+  fi
+}
+
 remove_firefox() {
   log "Removing Firefox..."
   sudo apt remove -y firefox || true
 }
 
-show_versions() {
+completion_log() {
   log "🔍 Installed Versions:"
   echo "Git:           $(git --version | cut -d ' ' -f3)"
   echo "Node.js:       $(node -v 2>/dev/null || echo 'Not installed')"
@@ -144,6 +158,9 @@ show_versions() {
   echo "Postman:       $(snap list postman 2>/dev/null | grep postman | awk '{print $2}' || echo 'Not installed')"
   echo "Discord:       $(dpkg -s discord 2>/dev/null | grep Version | awk '{print $2}' || echo 'Not installed')"
   echo "Spotify:       $(dpkg -s spotify-client 2>/dev/null | grep Version | awk '{print $2}' || echo 'Not installed')"
+  echo ""
+  echo "📎 SSH Public Key:"
+  cat ~/.ssh/id_ed25519.pub 2>/dev/null || echo "No SSH key found."
 }
 
 # Run all installers
@@ -158,6 +175,7 @@ install_gnome_tweaks
 install_grub_customizer
 install_discord
 install_spotify
+generate_ssh_key
 remove_firefox
 
 # Clean unused packages and apt cache
@@ -165,5 +183,5 @@ sudo apt autoremove -y
 sudo apt clean
 
 # Final log
-show_versions
+completion_log
 log "✅ All done! You may want to restart your terminal or source your shell config."
