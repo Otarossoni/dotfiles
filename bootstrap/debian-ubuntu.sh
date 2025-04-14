@@ -8,10 +8,6 @@ set -euo pipefail
 #   Tested on Debian/Ubuntu-based systems
 #---------------------------------------------
 
-# Variables
-GIT_NAME="Otávio Monteiro Rossoni"
-GIT_EMAIL="otarossoni@gmail.com"
-
 # Functions
 log() {
   echo -e "\n🔧 $1"
@@ -131,12 +127,6 @@ install_spotify() {
   sudo apt install -y spotify-client
 }
 
-configure_git() {
-  log "Configuring Git user name and email..."
-  git config --global user.name "$GIT_NAME"
-  git config --global user.email "$GIT_EMAIL"
-}
-
 remove_firefox() {
   log "Removing Firefox..."
   sudo apt remove -y firefox || true
@@ -168,7 +158,6 @@ install_gnome_tweaks
 install_grub_customizer
 install_discord
 install_spotify
-configure_git
 remove_firefox
 
 # Clean unused packages and apt cache
