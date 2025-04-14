@@ -5,7 +5,6 @@ set -euo pipefail
 #---------------------------------------------
 #   Linux Bootstrap Script
 #   Installs common developer tools
-#   Tested on Debian/Ubuntu-based systems
 #---------------------------------------------
 
 # Variables
@@ -44,14 +43,16 @@ install_nvm_and_node() {
 
   log "Installing latest LTS version of Node.js..."
   nvm install --lts
+  set +u
   nvm use --lts
   nvm alias default 'lts/*'
+  set -u
 }
 
 install_golang() {
   log "Installing latest Go (Golang)..."
 
-  GO_URL=$(curl -s https://go.dev/VERSION?m=text)
+  GO_URL=$(curl -s https://go.dev/VERSION?m=text | head -n 1)
   GO_VERSION=${GO_URL#go}
   ARCH=$(dpkg --print-architecture)
 
@@ -107,6 +108,13 @@ install_gnome_tweaks() {
   sudo apt install -y gnome-tweaks
 }
 
+install_grub_customizer() {
+  log "Installing GRUB Customizer..."
+  sudo add-apt-repository -y ppa:danielrichter2007/grub-customizer
+  sudo apt update
+  sudo apt install -y grub-customizer
+}
+
 install_discord() {
   log "Installing Discord..."
   wget -O /tmp/discord.deb "https://discordapp.com/api/download?platform=linux&format=deb"
@@ -116,7 +124,7 @@ install_discord() {
 
 install_spotify() {
   log "Installing Spotify..."
-  curl -sS https://download.spotify.com/debian/pubkey_7A3A762FAFD4A51F.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
+  curl -sS https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
   echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
   sudo apt update
   sudo apt install -y spotify-client
@@ -156,6 +164,7 @@ install_chrome
 install_postman
 install_docker
 install_gnome_tweaks
+install_grub_customizer
 install_discord
 install_spotify
 configure_git
