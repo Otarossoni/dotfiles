@@ -120,6 +120,30 @@ install_discord() {
   rm -f /tmp/discord.deb
 }
 
+install_obsidian() {
+  log "Installing Obsidian..."
+
+  ARCH=$(dpkg --print-architecture)
+  case "$ARCH" in
+    amd64) ARCH_TAG="amd64" ;;
+    arm64) ARCH_TAG="arm64" ;;
+    *) echo "Unsupported architecture: $ARCH" && exit 1 ;;
+  esac
+
+  OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest \
+    | grep "browser_download_url.*_${ARCH_TAG}.deb" \
+    | cut -d '"' -f 4)
+
+  if [ -z "$OBSIDIAN_URL" ]; then
+    echo "❌ Could not find the latest Obsidian .deb package for ${ARCH_TAG}."
+    exit 1
+  fi
+
+  wget -O /tmp/obsidian.deb "$OBSIDIAN_URL"
+  sudo apt install -y /tmp/obsidian.deb || sudo apt --fix-broken install -y
+  rm -f /tmp/obsidian.deb
+}
+
 install_spotify() {
   log "Installing Spotify..."
   curl -sS https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
@@ -174,6 +198,7 @@ install_docker
 install_gnome_tweaks
 install_grub_customizer
 install_discord
+install_obsidian
 install_spotify
 generate_ssh_key
 remove_firefox
