@@ -144,6 +144,30 @@ install_obsidian() {
   rm -f /tmp/obsidian.deb
 }
 
+install_dbeaver() {
+  log "Installing DBeaver CE..."
+
+  ARCH=$(dpkg --print-architecture)
+  case "$ARCH" in
+    amd64) ARCH_TAG="amd64" ;;
+    arm64) ARCH_TAG="arm64" ;;
+    *) echo "Unsupported architecture: $ARCH" && exit 1 ;;
+  esac
+
+  DBEAVER_URL=$(curl -s https://api.github.com/repos/dbeaver/dbeaver/releases/latest \
+    | grep "browser_download_url.*${ARCH_TAG}.deb" \
+    | cut -d '"' -f 4)
+
+  if [ -z "$DBEAVER_URL" ]; then
+    echo "❌ Could not find the latest DBeaver .deb package for ${ARCH_TAG}."
+    exit 1
+  fi
+
+  wget -O /tmp/dbeaver.deb "$DBEAVER_URL"
+  sudo apt install -y /tmp/dbeaver.deb || sudo apt --fix-broken install -y
+  rm -f /tmp/dbeaver.deb
+}
+
 install_spotify() {
   log "Installing Spotify..."
   curl -sS https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
@@ -199,6 +223,7 @@ install_gnome_tweaks
 install_grub_customizer
 install_discord
 install_obsidian
+install_dbeaver
 install_spotify
 generate_ssh_key
 remove_firefox
