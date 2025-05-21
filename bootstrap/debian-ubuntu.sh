@@ -194,6 +194,18 @@ remove_firefox() {
   sudo apt remove -y firefox || true
 }
 
+configure_fn_keys() {
+  log "Configuring function keys (F1–F12 as primary)..."
+
+  if [ ! -f /etc/modprobe.d/hid_apple.conf ]; then
+    echo 'options hid_apple fnmode=2' | sudo tee /etc/modprobe.d/hid_apple.conf
+    sudo update-initramfs -u
+    log "Permanent fnmode=2 configured. Please reboot to apply."
+  else
+    log "Permanent fnmode=2 already configured. Skipping."
+  fi
+}
+
 completion_log() {
   log "🔍 Installed Versions:"
   echo "Git:           $(git --version | cut -d ' ' -f3)"
@@ -227,6 +239,7 @@ install_dbeaver
 install_spotify
 generate_ssh_key
 remove_firefox
+configure_fn_keys
 
 # Clean unused packages and apt cache
 sudo apt autoremove -y
