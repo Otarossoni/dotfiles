@@ -27,7 +27,10 @@ install_apt_packages() {
     software-properties-common \
     remmina \
     openssh-client \
-    neovim
+    jq \
+    build-essential \
+    unzip \
+    ripgrep
 }
 
 install_nvm_and_node() {
@@ -177,6 +180,51 @@ install_spotify() {
   sudo apt install -y spotify-client
 }
 
+install_latest_neovim() {
+  log "Installing latest Neovim..."
+
+  ARCH=$(dpkg --print-architecture)
+  case "$ARCH" in
+    amd64|x86_64) ARCH_TAG="x86_64" ;;
+    arm64|aarch64) ARCH_TAG="arm64" ;;
+    *) echo "Unsupported architecture: $ARCH" && exit 1 ;;
+  esac
+
+  LATEST_URL=$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest | \
+    jq -r ".assets[] | select(.name | contains(\"nvim-linux-${ARCH_TAG}.tar.gz\")) | .browser_download_url")
+
+
+  if [ -z "$LATEST_URL" ]; then
+    echo "❌ Could not find Neovim release URL for linux${ARCH_TAG}"
+    exit 1
+  fi
+
+  wget -O /tmp/nvim.tar.gz "$LATEST_URL"
+  sudo rm -rf /opt/nvim
+  sudo mkdir -p /opt/nvim
+  sudo tar -C /opt/nvim --strip-components=1 -xzf /tmp/nvim.tar.gz
+  sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+  rm -f /tmp/nvim.tar.gz
+
+  log "Neovim latest version installed successfully!"
+}
+
+# configure_neovim() {
+#   log "Configuring Neovim..."
+
+#   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+#   NVIM_SOURCE_DIR="$SCRIPT_DIR/../nvim"
+#   NVIM_CONFIG_DIR="$HOME/.config/nvim"
+  
+#   if [ -d "$NVIM_SOURCE_DIR" ]; then
+#     mkdir -p "$NVIM_CONFIG_DIR"
+#     cp -r "$NVIM_SOURCE_DIR/"* "$NVIM_CONFIG_DIR/"
+#     log "Neovim configuration copied from $NVIM_SOURCE_DIR to $NVIM_CONFIG_DIR"
+#   else
+#     log "Neovim configuration directory not found at $NVIM_SOURCE_DIR. Skipping."
+#   fi
+# }
+
 generate_ssh_key() {
   log "Generating SSH key..."
   SSH_KEY="$HOME/.ssh/id_ed25519"
@@ -238,6 +286,8 @@ install_discord
 install_obsidian
 install_dbeaver
 install_spotify
+install_latest_neovim
+# configure_neovim
 generate_ssh_key
 remove_firefox
 configure_fn_keys
