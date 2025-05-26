@@ -26,7 +26,8 @@ install_apt_packages() {
     lsb-release \
     software-properties-common \
     remmina \
-    openssh-client
+    openssh-client \
+    neovim
 }
 
 install_nvm_and_node() {
