@@ -119,9 +119,7 @@ install_grub_customizer() {
 
 install_discord() {
   log "Installing Discord..."
-  wget -O /tmp/discord.deb "https://discordapp.com/api/download?platform=linux&format=deb"
-  sudo apt install -y /tmp/discord.deb
-  rm -f /tmp/discord.deb
+  sudo snap install discord
 }
 
 install_obsidian() {
