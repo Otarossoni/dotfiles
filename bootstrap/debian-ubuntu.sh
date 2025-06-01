@@ -74,6 +74,25 @@ install_golang() {
   export PATH=$PATH:/usr/local/go/bin
 }
 
+install_rust() {
+  log "Installing Rust (rustup)..."
+
+  if ! command -v rustc &> /dev/null; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    source "$HOME/.cargo/env"
+    echo 'source "$HOME/.cargo/env"' >> "$HOME/.bashrc"
+    echo 'source "$HOME/.cargo/env"' >> "$HOME/.zshrc"
+    log "Rust installed successfully."
+  else
+    log "Rust already installed. Ensuring it's up to date..."
+    source "$HOME/.cargo/env"
+  fi
+
+  rustup install stable
+  rustup default stable
+  log "Rust is now set to the latest stable version."
+}
+
 install_vscode() {
   log "Installing Visual Studio Code..."
   wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
@@ -207,21 +226,55 @@ install_latest_neovim() {
   log "Neovim latest version installed successfully!"
 }
 
-# configure_neovim() {
-#   log "Configuring Neovim..."
+install_alacritty() {
+  log "Installing Alacritty..."
 
-#   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-#   NVIM_SOURCE_DIR="$SCRIPT_DIR/../nvim"
-#   NVIM_CONFIG_DIR="$HOME/.config/nvim"
-  
-#   if [ -d "$NVIM_SOURCE_DIR" ]; then
-#     mkdir -p "$NVIM_CONFIG_DIR"
-#     cp -r "$NVIM_SOURCE_DIR/"* "$NVIM_CONFIG_DIR/"
-#     log "Neovim configuration copied from $NVIM_SOURCE_DIR to $NVIM_CONFIG_DIR"
-#   else
-#     log "Neovim configuration directory not found at $NVIM_SOURCE_DIR. Skipping."
-#   fi
-# }
+  sudo apt install -y cmake pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev python3
+
+  if ! command -v alacritty &> /dev/null; then
+    git clone https://github.com/alacritty/alacritty.git /tmp/alacritty
+    pushd /tmp/alacritty
+    cargo build --release
+    sudo cp target/release/alacritty /usr/local/bin
+    sudo cp extra/logo/alacritty-term.svg /usr/share/pixmaps/Alacritty.svg
+    sudo desktop-file-install extra/linux/Alacritty.desktop
+    sudo update-desktop-database
+    popd
+    rm -rf /tmp/alacritty
+  else
+    log "Alacritty already installed. Skipping."
+  fi
+}
+
+install_lazyvim() {
+  log "Installing LazyVim..."
+
+  NVIM_CONFIG_DIR="$HOME/.config/nvim"
+
+  if [ ! -d "$NVIM_CONFIG_DIR" ]; then
+    git clone https://github.com/LazyVim/starter "$NVIM_CONFIG_DIR"
+    rm -rf "$NVIM_CONFIG_DIR/.git"
+    log "LazyVim installed in $NVIM_CONFIG_DIR"
+  else
+    log "Neovim config directory already exists at $NVIM_CONFIG_DIR. Skipping LazyVim install."
+  fi
+}
+
+install_nerd_fonts() {
+  log "Installing Nerd Fonts..."
+
+  mkdir -p ~/.local/share/fonts
+  cd /tmp
+
+  FONT="FiraCode"
+  VERSION="3.0.2"
+
+  wget "https://github.com/ryanoasis/nerd-fonts/releases/download/v${VERSION}/${FONT}.zip" -O ${FONT}.zip
+  unzip -o ${FONT}.zip -d ~/.local/share/fonts/${FONT}
+  fc-cache -fv
+
+  log "Nerd Font ${FONT} installed!"
+}
 
 generate_ssh_key() {
   log "Generating SSH key..."
@@ -274,6 +327,7 @@ completion_log() {
 install_apt_packages
 install_nvm_and_node
 install_golang
+install_rust
 install_vscode
 install_chrome
 install_postman
@@ -285,7 +339,9 @@ install_obsidian
 install_dbeaver
 install_spotify
 install_latest_neovim
-# configure_neovim
+install_alacritty
+install_lazyvim
+install_nerd_fonts
 generate_ssh_key
 remove_firefox
 configure_fn_keys
