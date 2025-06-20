@@ -27,7 +27,7 @@ The `bootstrap/debian-ubuntu.sh` script automates the installation of common dev
 - **Global Git configuration**
 - **Firefox removal** (optional)
 
-### Usage
+### Debian/Ubuntu Usage
 
 ```bash
 # Clone this repository
@@ -39,4 +39,18 @@ chmod +x bootstrap/debian-ubuntu.sh
 
 # Run the script
 ./bootstrap/debian-ubuntu.sh
+```
+
+### Arch Usage
+
+```bash
+# Clone this repository
+git clone https://github.com/your-username/dotfiles.git
+cd dotfiles
+
+# Make the script executable
+chmod +x bootstrap/arch.sh
+
+# Run the script
+./bootstrap/arch.sh
 ```
