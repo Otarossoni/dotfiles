@@ -93,6 +93,62 @@ install_rust() {
   log "Rust is now set to the latest stable version."
 }
 
+install_sdkman() {
+  log "Installing SDKMAN!..."
+
+  if [ ! -d "$HOME/.sdkman" ]; then
+    curl -s "https://get.sdkman.io" | bash
+  else
+    log "SDKMAN! already installed. Skipping..."
+  fi
+
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+  log "SDKMAN! ready to use."
+}
+
+install_java25() {
+  log "Installing Java 25 (Temurin)..."
+
+  if [ ! -s "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
+    echo "❌ SDKMAN! not found. Please install it first."
+    exit 1
+  fi
+
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+  if ! sdk list java | grep -q "25.*tem"; then
+    sdk install java 25-tem
+  else
+    sdk install java 25-tem || true
+  fi
+
+  sdk default java 25-tem
+  log "Java 25 installed successfully!"
+  java -version
+}
+
+install_jetbrains_toolbox() {
+  log "Installing JetBrains Toolbox..."
+
+  TMP_DIR=$(mktemp -d)
+  cd "$TMP_DIR"
+
+  TOOLBOX_URL=$(curl -s https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release \
+    | grep -oP '(?<="linux":\{"link":")[^"]+')
+
+  if [ -z "$TOOLBOX_URL" ]; then
+    echo "❌ Could not determine JetBrains Toolbox download URL."
+    return 1
+  fi
+
+  wget -O jetbrains-toolbox.tar.gz "$TOOLBOX_URL"
+  tar -xzf jetbrains-toolbox.tar.gz
+  cd jetbrains-toolbox-*
+  ./jetbrains-toolbox & disown
+
+  log "JetBrains Toolbox launched — install IntelliJ IDEA from there."
+}
+
 install_vscode() {
   log "Installing Visual Studio Code..."
   wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
@@ -312,6 +368,7 @@ completion_log() {
   echo "Node.js:       $(node -v 2>/dev/null || echo 'Not installed')"
   echo "npm:           $(npm -v 2>/dev/null || echo 'Not installed')"
   echo "Go:            $(go version 2>/dev/null | awk '{print $3}')"
+  echo "Java:          $(java -version 2>&1 | head -n 1 || echo 'Not installed')"
   echo "Docker:        $(docker --version 2>/dev/null | awk '{print $3}' | tr -d ',')"
   echo "VSCode:        $(dpkg -s code 2>/dev/null | grep Version | awk '{print $2}')"
   echo "Google Chrome: $(google-chrome --version 2>/dev/null || echo 'Not installed')"
@@ -328,6 +385,9 @@ install_apt_packages
 install_nvm_and_node
 install_golang
 install_rust
+install_sdkman
+install_java25
+install_jetbrains_toolbox
 install_vscode
 install_chrome
 install_postman

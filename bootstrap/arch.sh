@@ -72,6 +72,26 @@ install_rust() {
   rustup default stable
 }
 
+install_sdkman_and_java() {
+  log "Installing SDKMAN and Java 25..."
+  if [ ! -d "$HOME/.sdkman" ]; then
+    curl -s "https://get.sdkman.io" | bash
+  fi
+
+  export SDKMAN_DIR="$HOME/.sdkman"
+  [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+
+  sdk install java 25-open
+  sdk default java 25-open
+
+  log "Java 25 installed successfully via SDKMAN."
+}
+
+install_jetbrains_toolbox() {
+  log "Installing JetBrains Toolbox (AUR)..."
+  yay -S --noconfirm jetbrains-toolbox
+}
+
 install_vscode() {
   log "Installing Visual Studio Code (AUR)..."
   yay -S --noconfirm visual-studio-code-bin
@@ -151,6 +171,7 @@ completion_log() {
   echo "Node.js:       $(node -v 2>/dev/null || echo 'Not installed')"
   echo "npm:           $(npm -v 2>/dev/null || echo 'Not installed')"
   echo "Go:            $(go version 2>/dev/null | awk '{print $3}')"
+  echo "Java:          $(java -version 2>&1 | head -n 1 || echo 'Not installed')"
   echo "Docker:        $(docker --version 2>/dev/null | awk '{print $3}' | tr -d ',')"
   echo "VSCode:        $(code --version 2>/dev/null | head -n1 || echo 'Not installed')"
   echo "Chrome:        $(google-chrome --version 2>/dev/null || echo 'Not installed')"
@@ -165,6 +186,8 @@ install_yay
 install_nvm_and_node
 install_golang
 install_rust
+install_sdkman_and_java
+install_jetbrains_toolbox
 install_vscode
 install_chrome
 install_postman
