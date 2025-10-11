@@ -74,17 +74,26 @@ install_rust() {
 
 install_sdkman_and_java() {
   log "Installing SDKMAN and Java 25..."
+
   if [ ! -d "$HOME/.sdkman" ]; then
     curl -s "https://get.sdkman.io" | bash
   fi
 
   export SDKMAN_DIR="$HOME/.sdkman"
-  [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+
+  set +u
+  if [ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]; then
+    source "$SDKMAN_DIR/bin/sdkman-init.sh"
+  else
+    log "❌ sdkman-init.sh não encontrado!"
+    exit 1
+  fi
 
   sdk install java 25-open
   sdk default java 25-open
+  set -u
 
-  log "Java 25 installed successfully via SDKMAN."
+  log "✅ Java 25 instalado com sucesso via SDKMAN."
 }
 
 install_jetbrains_toolbox() {
